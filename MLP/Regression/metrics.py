@@ -97,7 +97,7 @@ def metrics(rules, model, enc_dim, dim, seed, ckpt='_last'):
 models = ['Monolithic', 'GT_Modular', 'Modular', 'Modular_joint', 'Modular_operation-only']
 rules = [2, 4, 8, 16, 32]
 encs = [32, 64, 128, 256, 512]
-dims = [128, 256, 512, 1024, 2048]
+dims = [64] # dims = [128, 256, 512, 1024, 2048]
 
 for r in rules:
     for enc, dim in zip(encs, dims):
