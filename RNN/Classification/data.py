@@ -20,7 +20,7 @@ def rules(num_points, length, num_rules, order, dim, data_seed=0, ood=False, pro
     data = np.random.randn(num_points, length, dim)
     states = np.zeros((num_points, length, dim))
     
-    noise = np.np.random.normal(noise_mean, noise_std, data.shape)
+    noise = np.random.normal(noise_mean, noise_std, data.shape)
     data = data + noise
 
     if ood:
