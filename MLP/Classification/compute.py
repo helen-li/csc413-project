@@ -8,10 +8,10 @@ pd.set_option('display.max_columns', None)
 
 rules = [2, 4, 8, 16, 32]
 ds = [0, 1, 2, 3, 4]
-encs = [32, 64, 128, 256, 512]
-dims = [128, 256, 512, 1024, 2048]
+encs = [32] # encs = [32, 64, 128, 256, 512]
+dims = [64] # dims = [128, 256, 512, 1024, 2048]
 models = ['GT_Modular', 'Modular_operation-only', 'Monolithic', 'Modular_joint']
-modes = ['last', 'best']
+modes = ['last'] # modes = ['last', 'best']
 
 df_final = pd.DataFrame(columns=['Mode', 'Model', 'Rules', 'Encoder Dimension',
                            'Dimension', 'Data Seed', 'Seed', 'Number of Parameters',
@@ -63,7 +63,7 @@ for mode in modes:
         print(f'Rule: {r}')
         for enc, dim in zip(encs, dims):
             print(f'Enc: {enc} | Dim: {dim}')
-            for ds in range(5):
+            for ds in range(1): # TODO: originally 5
                 min_perf, min_perf_ood, min_perf_sub, min_perf_ood_sub = float('-inf'), float('-inf'), float('-inf'), float('-inf')
                 min_name ,min_name_ood, min_name_sub, min_name_ood_sub = None, None, None, None
 
@@ -71,7 +71,7 @@ for mode in modes:
                     avg_perf = 0.
                     avg_perf_ood = 0.
 
-                    for seed in range(5):
+                    for seed in range(1):   # TODO: originally 5
                         name = f'Logs/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_{r}_{seed}'
 
                         # Get number of parameters
