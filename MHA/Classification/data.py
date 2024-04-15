@@ -43,30 +43,38 @@ def product(a, b):
 def coeff_sum(a, b, c1, c2):
     return c1 * a + c2 * b
 
-def rule_v1(data, search1, search2, retrieve1, retrieve2, func, search=search_v1):
+def rule_v1(data, search1, search2, retrieve1, retrieve2, func, search=search_v1, noise_mean=0, noise_std=0.0):
     s1 = search(data[:,:,search1])
     out1 = retrieve(data, s1, retrieve1)
 
     s2 = search(data[:,:,search2])
     out2 = retrieve(data, s2, retrieve2)
+    
+    # add gaussian noise
+    ret_val = func(out1, out2)
+    # noise = np.random.normal(noise_mean, noise_std, ret_val.shape)
+    # ret_val = ret_val + noise
+    return ret_val >= 0.
 
-    return func(out1, out2) >= 0.
-
-def rule_v2(data, search1, search2, retrieve1, retrieve2, c1=None, c2=None, search=search_v1):
+def rule_v2(data, search1, search2, retrieve1, retrieve2, c1=None, c2=None, search=search_v1, noise_mean=0, noise_std=0.0):
     s1 = search(data[:, :, search1])
     out1 = retrieve(data, s1, retrieve1)
 
     s2 = search(data[:, :, search2])
     out2 = retrieve(data, s2, retrieve2)
 
-    return coeff_sum(out1, out2, c1, c2) >= 0.
+    # add gaussian noise
+    ret_val = coeff_sum(out1, out2, c1, c2)
+    # noise = np.random.normal(noise_mean, noise_std, ret_val.shape)
+    # ret_val = ret_val + noise
+    return ret_val >= 0.
 
 def onehot(task, num_rules):
     task_onehot = np.zeros((task.size, num_rules))
     task_onehot[np.arange(task.size), task] = 1.
     return task_onehot
 
-def rules(num_points, length, num_rules, version=2, search_version=1, data_seed=0, ood=False, prob=None):
+def rules(num_points, length, num_rules, version=2, search_version=1, data_seed=0, ood=False, prob=None, noise_mean=0, noise_std=0.0):
     rng = np.random.RandomState(data_seed)
     coeff1 = rng.randn(num_rules)
     coeff2 = rng.randn(num_rules)
@@ -103,13 +111,13 @@ def rules(num_points, length, num_rules, version=2, search_version=1, data_seed=
 
     for r in range(num_rules):
         if version == 1 and search_version == 1:
-            hyp[:, :, r] = rule_v1(data, 4 * r, 4 * r + 1, 4 * r + 2, 4 * r + 3, rule_functions[r], search_v1)
+            hyp[:, :, r] = rule_v1(data, 4 * r, 4 * r + 1, 4 * r + 2, 4 * r + 3, rule_functions[r], search_v1, noise_mean, noise_std)
         elif version == 1 and search_version == 2:
-            hyp[:, :, r] = rule_v1(data, [6 * r, 6 * r + 1], [6 * r + 2, 6 * r + 3], 6 * r + 4, 6 * r + 5, rule_functions[r], search_v2)
+            hyp[:, :, r] = rule_v1(data, [6 * r, 6 * r + 1], [6 * r + 2, 6 * r + 3], 6 * r + 4, 6 * r + 5, rule_functions[r], search_v2, noise_mean, noise_std)
         elif version == 2 and search_version == 1:
-            hyp[:, :, r] = rule_v2(data, 4 * r, 4 * r + 1, 4 * r + 2, 4 * r + 3, coeff1[r], coeff2[r], search_v1)
+            hyp[:, :, r] = rule_v2(data, 4 * r, 4 * r + 1, 4 * r + 2, 4 * r + 3, coeff1[r], coeff2[r], search_v1, noise_mean, noise_std)
         elif version == 2 and search_version == 2:
-            hyp[:, :, r] = rule_v2(data, [6 * r, 6 * r + 1], [6 * r + 2, 6 * r + 3], 6 * r + 4, 6 * r + 5, coeff1[r], coeff2[r], search_v2)
+            hyp[:, :, r] = rule_v2(data, [6 * r, 6 * r + 1], [6 * r + 2, 6 * r + 3], 6 * r + 4, 6 * r + 5, coeff1[r], coeff2[r], search_v2, noise_mean, noise_std)
         else:
             print("Wrong data parameters")
             exit()
@@ -117,3 +125,18 @@ def rules(num_points, length, num_rules, version=2, search_version=1, data_seed=
     labels = np.sum(hyp * task, axis=-1)
     samples = np.concatenate((data, task), axis=-1)
     return samples, labels, task
+
+if __name__ == "__main__":
+  num_points = 10
+  length = 5
+  num_rules = 2
+
+  # Generate data with known rules
+  samples, labels, task = rules(num_points, length, num_rules)
+
+  # Print a small sample of data and labels for verification
+  print("Sample data:")
+  print(samples[:2])  # Print first 2 samples
+
+  print("\nSample labels:")
+  print(labels[:2])  # Print first 2 labels

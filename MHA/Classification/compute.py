@@ -15,11 +15,11 @@ args = parser.parse_args()
 
 sver = [1, 2]
 rules = [2, 4, 8, 16, 32]
-ds = [0, 1, 2, 3, 4]
-encs = [32, 64, 128, 256, 512]
-dims = [128, 256, 512, 1024, 2048]
+ds = [0]    # [0, 1, 2, 3, 4]
+encs = [32]  # [32, 64, 128, 256, 512]
+dims = [64]  # [128, 256, 512, 1024, 2048]
 models = ['GT_Modular', 'Modular_operation-only', 'Monolithic', 'Modular']
-modes = ['last', 'best']
+modes = ['last']    # ['last', 'best']
 
 def get_ranking_init():
     rank = dict()
@@ -76,7 +76,7 @@ for sv in sver:
 
             for enc, dim in zip(encs, dims):
                 print(f'Enc: {enc} | Dim: {dim}')
-                for ds in range(5):
+                for ds in range(1): # range(5)
                     min_perf, min_perf_ood, min_perf_sub, min_perf_ood_sub = float('-inf'), float('-inf'), float('-inf'), float('-inf')
                     min_name ,min_name_ood, min_name_sub, min_name_ood_sub = None, None, None, None
 

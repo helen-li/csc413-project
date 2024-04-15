@@ -56,7 +56,7 @@ def eval_step(eval_len=args.seq_len, ood=False, n_evals=100):
     with torch.no_grad():
         for _ in range(n_evals):
             data, label, op = rules(args.batch_size, eval_len, args.gt_rules, 2, \
-                                args.search_version, args.data_seed, ood)
+                                args.search_version, args.data_seed, ood, noise_mean=0, noise_std=0.0)
 
             data = torch.Tensor(data).to(device)
             label = torch.Tensor(label).to(device)

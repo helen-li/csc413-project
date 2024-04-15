@@ -64,7 +64,7 @@ def specialization_metric():
             p = rng.dirichlet(alpha = np.ones(args.gt_rules))
             for _ in range(10):
                 data, label, op = rules(1000, args.seq_len, args.gt_rules, 2, \
-                                        args.search_version, args.data_seed, False, prob=p)
+                                        args.search_version, args.data_seed, False, prob=p, noise_mean=0, noise_std=0.0)
 
                 data = torch.Tensor(data).to(device)
                 label = torch.Tensor(label).to(device)
