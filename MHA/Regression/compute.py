@@ -48,7 +48,7 @@ mapping_sub = {
 }
 
 def get_min(avg_perf, model, min_perf, min_name):
-    if avg_perf < min_perf:
+    if avg_perf > min_perf:
         min_perf = avg_perf
         min_name = model
 
