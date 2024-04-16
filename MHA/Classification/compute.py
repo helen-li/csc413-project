@@ -13,7 +13,7 @@ parser.add_argument('--rule', type=int, default=2, choices=(2,4,8,16,32))
 parser.add_argument('--mode', type=str, default='last', choices=('last','best'))
 args = parser.parse_args()
 
-sver = [1, 2]
+sver = [1]  # sver = [1, 2]
 rules = [2, 4, 8, 16, 32]
 ds = [0]    # [0, 1, 2, 3, 4]
 encs = [32]  # [32, 64, 128, 256, 512]
@@ -84,11 +84,11 @@ for sv in sver:
                         avg_perf = 0.
                         avg_perf_ood = 0.
 
-                        for seed in range(5):
-                            if 'Monolithic' in model:
-                                name = f'Sequence_10/Search-Version_{sv}/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_{r*2}_{r}_{seed}'
-                            else:
-                                name = f'Sequence_10/Search-Version_{sv}/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_2_{r}_{seed}'
+                        for seed in range(1):   #range(5)
+                            # if 'Monolithic' in model:
+                            #     name = f'Sequence_10/Search-Version_{sv}/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_{r*2}_{r}_{seed}'
+                            # else:
+                            name = f'Sequence_10/Search-Version_{sv}/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_2_{r}_{seed}'
 
                             # Get number of parameters
                             with open(f'{name}/log.txt', 'r') as f:

@@ -21,7 +21,7 @@ parser.add_argument('--seq-len', type=int, default=10)
 
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument('--lr', type=float, default=0.0001)
-parser.add_argument('--iterations', type=int, default=500000)
+parser.add_argument('--iterations', type=int, default=50000)
 
 parser.add_argument('--dim', type=int, default=128)
 parser.add_argument('--att-dim', type=int, default=512)
@@ -49,9 +49,9 @@ def set_seed(seed):
 set_seed(args.seed)
 
 if args.seq_len == 10:
-    test_lens = [3, 5, 10, 20, 30]
+    test_lens = [3, 5, 10]  # [3, 5, 10, 20, 30]
 else:
-    test_lens = [10, 20, 30, 40, 50]
+    test_lens = [3, 5, 10]    # [10, 20, 30, 40, 50]
 
 config = vars(args)
 device = torch.device('cuda')
@@ -117,7 +117,7 @@ def eval_step(eval_len=args.seq_len, ood=False, n_evals=10):
 
     for _ in range(n_evals):
         data, label, op = rules(args.batch_size, eval_len, args.gt_rules, 2, \
-                            args.search_version, args.data_seed, ood, noise_mean=0, noise_std=0.0)
+                            args.search_version, args.data_seed, ood, noise_mean=0, noise_std=2.0)
 
         data = torch.Tensor(data).to(device)
         label = torch.Tensor(label).to(device)
@@ -139,7 +139,7 @@ def train_step():
     model.zero_grad()
 
     data, label, op = rules(args.batch_size, args.seq_len, args.gt_rules, 2, \
-                            args.search_version, args.data_seed, noise_mean=0, noise_std=0.0)
+                            args.search_version, args.data_seed, noise_mean=0, noise_std=2.0)
 
     data = torch.Tensor(data).to(device)
     label = torch.Tensor(label).to(device)

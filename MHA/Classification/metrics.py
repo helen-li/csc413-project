@@ -94,10 +94,10 @@ rules = [2, 4, 8, 16, 32]
 encs = [32]  # [32, 64, 128, 256, 512]
 dims = [64]  # [128, 256, 512, 1024, 2048]
 
-for sv in range(1,3):
+for sv in range(1,2):
     for r in rules:
         for enc, dim in zip(encs, dims):
             for model in models:
                 for ckpt in ['_last']: # ['_last', '_best']
-                    for seed in range(25):
+                    for seed in [0]:  # range(25)
                         metrics(sv, r, model, enc, dim, seed, ckpt)
