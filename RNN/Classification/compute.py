@@ -14,9 +14,9 @@ args = parser.parse_args()
 
 rules = [2, 4, 8, 16, 32]
 ds = [0, 1, 2, 3, 4]
-encs = [32] # [32, 64, 128, 256, 512]
+encs = [128] # [32, 64, 128, 256, 512]
 dims = [128] # [128, 256, 512, 1024, 2048]
-models = ['GT_Modular', 'Modular_operation-only', 'Monolithic', 'Modular']
+models = ['GT_Modular', 'Modular_operation-only', 'Monolithic'] # ['GT_Modular', 'Modular_operation-only', 'Monolithic', 'Modular']
 modes = ['last'] # ['last', 'best']
 
 def get_ranking_init():
@@ -81,7 +81,7 @@ for mode in modes:
                     avg_perf_ood = 0.
 
                     for seed in range(1):
-                        name = f'Sequence_10_Order_1_Dim_32/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_{r}_{seed}'
+                        name = f'Sequence_10_Order_1_Dim_1/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_{r}_{seed}'
 
                         # Get number of parameters
                         with open(f'{name}/log.txt', 'r') as f:
