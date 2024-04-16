@@ -34,7 +34,7 @@ def get_name(rules, model, enc_dim, dim, seed):
     d = seed % 5
     s = seed // 5
 
-    return f'Sequence_10_Order_1_Dim_32/Data-Seed_{d}/GT_Rules_{rules}/{model}_{enc_dim}_{dim}_{rules}_{s}'
+    return f'Sequence_10_Order_1_Dim_1/Data-Seed_{d}/GT_Rules_{rules}/{model}_{enc_dim}_{dim}_{rules}_{s}'
 
 def metrics(rules, model, enc_dim, dim, seed, ckpt='_last'):
     name = get_name(rules, model, enc_dim, dim, seed)
@@ -86,8 +86,8 @@ def metrics(rules, model, enc_dim, dim, seed, ckpt='_last'):
 
 models = ['Monolithic', 'GT_Modular', 'Modular', 'Modular_operation-only']
 rules = [2, 4, 8, 16, 32]
-encs = [32, 64, 128, 256, 512]
-dims = [128, 256, 512, 1024, 2048]
+encs = [128] # [32, 64, 128, 256, 512]
+dims = [128] # [128, 256, 512, 1024, 2048]
 
 for r in rules:
     for enc, dim in zip(encs, dims):
