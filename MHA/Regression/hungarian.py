@@ -57,8 +57,8 @@ def metrics(sv, rules, model, enc_dim, dim, seed, ckpt='_last'):
 
 models = ['Monolithic', 'GT_Modular', 'Modular', 'Modular_operation-only']
 rules = [2, 4, 8, 16, 32]
-encs = [32, 64, 128, 256, 512]
-dims = [128, 256, 512, 1024, 2048]
+encs = [32]  # [32, 64, 128, 256, 512]
+dims = [64]  # [128, 256, 512, 1024, 2048]
 
 for sv in range(1,3):
     for r in rules:

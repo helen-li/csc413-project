@@ -56,7 +56,7 @@ def get_prob():
     with torch.no_grad():
         for _ in range(1000):
             data, label, op = rules(1000, args.seq_len, args.gt_rules, 2, \
-                                    args.search_version, args.data_seed)
+                                    args.search_version, args.data_seed, noise_mean=0, noise_std=0.0)
 
             data = torch.Tensor(data).to(device)
             label = torch.Tensor(label).to(device)

@@ -13,13 +13,13 @@ parser.add_argument('--rule', type=int, default=2, choices=(2,4,8,16,32))
 parser.add_argument('--mode', type=str, default='last', choices=('last','best'))
 args = parser.parse_args()
 
-sver = [1, 2]
+sver = [1]  # sver = [1, 2]
 rules = [2, 4, 8, 16, 32]
-ds = [0, 1, 2, 3, 4]
-encs = [32, 64, 128, 256, 512]
-dims = [128, 256, 512, 1024, 2048]
+ds = [0]    # [0, 1, 2, 3, 4]
+encs = [32]  # [32, 64, 128, 256, 512]
+dims = [64]  # [128, 256, 512, 1024, 2048]
 models = ['GT_Modular', 'Modular_operation-only', 'Monolithic', 'Modular']
-modes = ['last', 'best']
+modes = ['last']    # ['last', 'best']
 
 def get_ranking_init():
     rank = dict()
@@ -77,19 +77,19 @@ for sv in sver:
 
             for enc, dim in zip(encs, dims):
                 print(f'Enc: {enc} | Dim: {dim}')
-                for ds in range(5):
-                    min_perf, min_perf_ood, min_perf_sub, min_perf_ood_sub = float('inf'), float('inf'), float('inf'), float('inf')
+                for ds in range(1): # range(5)
+                    min_perf, min_perf_ood, min_perf_sub, min_perf_ood_sub = float('-inf'), float('-inf'), float('-inf'), float('-inf')
                     min_name ,min_name_ood, min_name_sub, min_name_ood_sub = None, None, None, None
 
                     for model in models:
                         avg_perf = 0.
                         avg_perf_ood = 0.
 
-                        for seed in range(5):
-                            if 'Monolithic' in model:
-                                name = f'Sequence_10/Search-Version_{sv}/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_{r*2}_{r}_{seed}'
-                            else:
-                                name = f'Sequence_10/Search-Version_{sv}/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_2_{r}_{seed}'
+                        for seed in range(1):   #range(5)
+                            # if 'Monolithic' in model:
+                            #     name = f'Sequence_10/Search-Version_{sv}/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_{r*2}_{r}_{seed}'
+                            # else:
+                            name = f'Sequence_10/Search-Version_{sv}/Data-Seed_{ds}/GT_Rules_{r}/{model}_{enc}_{dim}_2_{r}_{seed}'
 
                             # Get number of parameters
                             with open(f'{name}/log.txt', 'r') as f:
