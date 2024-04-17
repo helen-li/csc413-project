@@ -13,10 +13,10 @@ parser.add_argument('--mode', type=str, default='last', choices=('last','best'))
 args = parser.parse_args()
 
 rules = [2, 4, 8, 16, 32]
-ds = [0, 1, 2, 3, 4]
-encs = [128] # [32, 64, 128, 256, 512]
-dims = [128] # [128, 256, 512, 1024, 2048]
-models = ['GT_Modular', 'Modular_operation-only', 'Monolithic'] # ['GT_Modular', 'Modular_operation-only', 'Monolithic', 'Modular']
+ds = [0]  # [0, 1, 2, 3, 4]
+encs = [32] # [32, 64, 128, 256, 512]
+dims = [64] # [128, 256, 512, 1024, 2048]
+models = ['GT_Modular', 'Modular_operation-only', 'Monolithic', 'Modular']
 modes = ['last'] # ['last', 'best']
 
 def get_ranking_init():
