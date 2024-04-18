@@ -70,9 +70,12 @@ def data_v2(num_examples, num_rules, data_seed, ood=False, prob=None, noise_mean
     result = np.zeros([num_examples, num_rules])
 
     for r in range(num_rules):
-        # inject noise into the features for each rule
-        noise = np.random.normal(noise_mean, noise_std, result[:, r].shape)
-        result[:, r] = (coeff1[r] * a + coeff2[r] * b)[:,0] + noise >= 0.
+        # inject noise into the features for each rule if noise_std != 0
+        if noise_std == 0:
+            result[:, r] = (coeff1[r] * a + coeff2[r] * b)[:,0] >= 0
+        else:
+            noise = np.random.normal(noise_mean, noise_std, result[:, r].shape)
+            result[:, r] = (coeff1[r] * a + coeff2[r] * b)[:,0] + noise >= 0.
 
     result = np.sum(result * task, axis=-1)
     sample = np.concatenate((a, b, task), axis=-1)
