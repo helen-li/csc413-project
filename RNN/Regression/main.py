@@ -22,7 +22,7 @@ parser.add_argument('--data-seed', type=int, default=0)
 
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument('--lr', type=float, default=0.0001)
-parser.add_argument('--iterations', type=int, default=100000)
+parser.add_argument('--iterations', type=int, default=50000)
 
 parser.add_argument('--enc-dim', type=int, default=128)
 parser.add_argument('--h-dim', type=int, default=128)
@@ -46,7 +46,7 @@ def set_seed(seed):
 set_seed(args.seed)
 
 if args.seq_len == 10:
-    test_lens = [3, 5, 10, 20, 30]
+    test_lens = [3, 5, 10]  # [3, 5, 10, 20, 30]
 else:
     test_lens = [10, 20, 30, 40, 50]
 
@@ -95,6 +95,8 @@ with open(os.path.join(name, 'log.txt'), 'w') as f:
     f.write(f"Number of Parameters: {num_params}\n")
 
 optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+if args.scheduler:
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,20,30], gamma=0.5)
 criterion = nn.L1Loss()
 
 df = pd.DataFrame(columns=["Iterations", "Loss"])

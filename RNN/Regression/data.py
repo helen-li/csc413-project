@@ -18,9 +18,6 @@ def rules(num_points, length, num_rules, order, dim, data_seed=0, ood=False, pro
     task = np.reshape(onehot(task, num_rules), (num_points, length, num_rules))
     data = np.random.randn(num_points, length, dim)
     states = np.zeros((num_points, length, dim))
-    
-    noise = np.random.normal(noise_mean, noise_std, data.shape)
-    data = data + noise
 
     if ood:
         data = data * 2
@@ -41,7 +38,8 @@ def rules(num_points, length, num_rules, order, dim, data_seed=0, ood=False, pro
         states[:, l, :] = np.sum(d * task[:, l:l+1, :], axis=-1)
 
     inp = np.concatenate([data, task], axis=-1)
-
+    noise = np.random.normal(noise_mean, noise_std, states.shape)
+    states = states + noise
     return inp, states, task
 
 if __name__ == '__main__':
