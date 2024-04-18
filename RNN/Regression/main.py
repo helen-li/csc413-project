@@ -29,6 +29,7 @@ parser.add_argument('--h-dim', type=int, default=128)
 parser.add_argument('--model', type=str, default='Monolithic', choices=('Monolithic', 'Modular', 'GT_Modular'))
 parser.add_argument('--num-rules', type=int, default=2)
 parser.add_argument('--op', action='store_true', default=False)
+parser.add_argument('--noise-std', type=float, default=0.0)
 
 parser.add_argument('--scheduler', action='store_true', default=False)
 parser.add_argument('--seed', type=int, default=0)
@@ -107,7 +108,7 @@ def eval_step(eval_len=args.seq_len, ood=False, n_evals=10):
 
     for _ in range(n_evals):
         data, label, op = rules(args.batch_size, eval_len, args.gt_rules, args.order, \
-                            args.d_dim, args.data_seed, ood)
+                            args.d_dim, args.data_seed, ood, noise_std=args.noise_std)
 
         data = torch.Tensor(data).to(device)
         label = torch.Tensor(label).to(device)
@@ -125,7 +126,7 @@ def train_step():
     model.zero_grad()
 
     data, label, op = rules(args.batch_size, args.seq_len, args.gt_rules, args.order, \
-                            args.d_dim, args.data_seed)
+                            args.d_dim, args.data_seed, noise_std=args.noise_std)
 
     data = torch.Tensor(data).to(device)
     label = torch.Tensor(label).to(device)

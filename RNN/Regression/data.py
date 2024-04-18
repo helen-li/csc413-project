@@ -5,7 +5,7 @@ def onehot(task, num_rules):
     task_onehot[np.arange(task.size), task] = 1.
     return task_onehot
 
-def rules(num_points, length, num_rules, order, dim, data_seed=0, ood=False, prob=None, noise_mean=0, noise_std=2.0):
+def rules(num_points, length, num_rules, order, dim, data_seed=0, ood=False, prob=None, noise_mean=0, noise_std=0.0):
     rng = np.random.RandomState(data_seed)
     coeff1 = rng.randn(num_rules, order, dim, dim) / np.sqrt(order * dim)
     coeff2 = rng.randn(num_rules, dim, dim) / np.sqrt(dim)
@@ -38,8 +38,9 @@ def rules(num_points, length, num_rules, order, dim, data_seed=0, ood=False, pro
         states[:, l, :] = np.sum(d * task[:, l:l+1, :], axis=-1)
 
     inp = np.concatenate([data, task], axis=-1)
-    noise = np.random.normal(noise_mean, noise_std, states.shape)
-    states = states + noise
+    if noise_std != 0:
+        noise = np.random.normal(noise_mean, noise_std, states.shape)
+        states = states + noise
     return inp, states, task
 
 if __name__ == '__main__':

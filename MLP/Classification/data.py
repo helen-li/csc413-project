@@ -23,6 +23,7 @@ def onehot(task, num_rules):
     task_onehot[np.arange(task.size), task] = 1.
     return task_onehot
 
+# data_v1 function not used in main.py
 def data_v1(num_examples, num_rules=2, data_seed=None, ood=False, prob=None):
     a = np.random.randn(num_examples, 1)
     b = np.random.randn(num_examples, 1)
@@ -49,7 +50,7 @@ def data_v1(num_examples, num_rules=2, data_seed=None, ood=False, prob=None):
 
     return sample, result
 
-def data_v2(num_examples, num_rules, data_seed, ood=False, prob=None, noise_mean=0, noise_std=2.0):
+def data_v2(num_examples, num_rules, data_seed, ood=False, prob=None, noise_mean=0, noise_std=0.0):
     rng = np.random.RandomState(data_seed)
     coeff1 = rng.randn(num_rules)
     coeff2 = rng.randn(num_rules)
