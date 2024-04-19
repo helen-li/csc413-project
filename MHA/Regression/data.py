@@ -43,7 +43,7 @@ def product(a, b):
 def coeff_sum(a, b, c1, c2):
     return c1 * a + c2 * b
 
-def rule_v1(data, search1, search2, retrieve1, retrieve2, func, search=search_v1, noise_mean=0.0, noise_std=0.1):
+def rule_v1(data, search1, search2, retrieve1, retrieve2, func, search=search_v1, noise_mean=0.0, noise_std=0.0):
     s1 = search(data[:,:,search1])
     out1 = retrieve(data, s1, retrieve1)
 
@@ -52,11 +52,12 @@ def rule_v1(data, search1, search2, retrieve1, retrieve2, func, search=search_v1
 
     # add gaussian noise
     ret_val = func(out1, out2)
-    noise = np.random.normal(noise_mean, noise_std, ret_val.shape)
-    ret_val = ret_val + noise
+    if noise_std != 0:
+        noise = np.random.normal(noise_mean, noise_std, ret_val.shape)
+        ret_val = ret_val + noise
     return ret_val
 
-def rule_v2(data, search1, search2, retrieve1, retrieve2, c1=None, c2=None, search=search_v1, noise_mean=0.0, noise_std=0.1):
+def rule_v2(data, search1, search2, retrieve1, retrieve2, c1=None, c2=None, search=search_v1, noise_mean=0.0, noise_std=0.0):
     s1 = search(data[:, :, search1])
     out1 = retrieve(data, s1, retrieve1)
 
@@ -65,8 +66,9 @@ def rule_v2(data, search1, search2, retrieve1, retrieve2, c1=None, c2=None, sear
 
     # add gaussian noise
     ret_val = coeff_sum(out1, out2, c1, c2)
-    noise = np.random.normal(noise_mean, noise_std, ret_val.shape)
-    ret_val = ret_val + noise
+    if noise_std != 0:
+        noise = np.random.normal(noise_mean, noise_std, ret_val.shape)
+        ret_val = ret_val + noise
     return ret_val
 
 def onehot(task, num_rules):
@@ -111,13 +113,13 @@ def rules(num_points, length, num_rules, version=2, search_version=1, data_seed=
 
     for r in range(num_rules):
         if version == 1 and search_version == 1:
-            hyp[:, :, r] = rule_v1(data, 4 * r, 4 * r + 1, 4 * r + 2, 4 * r + 3, rule_functions[r], search_v1)
+            hyp[:, :, r] = rule_v1(data, 4 * r, 4 * r + 1, 4 * r + 2, 4 * r + 3, rule_functions[r], search_v1, noise_mean, noise_std)
         elif version == 1 and search_version == 2:
-            hyp[:, :, r] = rule_v1(data, [6 * r, 6 * r + 1], [6 * r + 2, 6 * r + 3], 6 * r + 4, 6 * r + 5, rule_functions[r], search_v2)
+            hyp[:, :, r] = rule_v1(data, [6 * r, 6 * r + 1], [6 * r + 2, 6 * r + 3], 6 * r + 4, 6 * r + 5, rule_functions[r], search_v2, noise_mean, noise_std)
         elif version == 2 and search_version == 1:
-            hyp[:, :, r] = rule_v2(data, 4 * r, 4 * r + 1, 4 * r + 2, 4 * r + 3, coeff1[r], coeff2[r], search_v1)
+            hyp[:, :, r] = rule_v2(data, 4 * r, 4 * r + 1, 4 * r + 2, 4 * r + 3, coeff1[r], coeff2[r], search_v1, noise_mean, noise_std)
         elif version == 2 and search_version == 2:
-            hyp[:, :, r] = rule_v2(data, [6 * r, 6 * r + 1], [6 * r + 2, 6 * r + 3], 6 * r + 4, 6 * r + 5, coeff1[r], coeff2[r], search_v2)
+            hyp[:, :, r] = rule_v2(data, [6 * r, 6 * r + 1], [6 * r + 2, 6 * r + 3], 6 * r + 4, 6 * r + 5, coeff1[r], coeff2[r], search_v2, noise_mean, noise_std)
         else:
             print("Wrong data parameters")
             exit()

@@ -23,6 +23,7 @@ def onehot(task, num_rules):
     task_onehot[np.arange(task.size), task] = 1.
     return task_onehot
 
+# data_v1 function not used in main.py
 def data_v1(num_examples, num_rules=2, data_seed=None, ood=False, prob=None):
     a = np.random.randn(num_examples, 1)
     b = np.random.randn(num_examples, 1)
@@ -49,7 +50,7 @@ def data_v1(num_examples, num_rules=2, data_seed=None, ood=False, prob=None):
 
     return sample, result
 
-def data_v2(num_examples, num_rules, data_seed, ood=False, prob=None, noise_mean=0, noise_std=2.0):
+def data_v2(num_examples, num_rules, data_seed, ood=False, prob=None, noise_mean=0, noise_std=0.0):
     rng = np.random.RandomState(data_seed)
     coeff1 = rng.randn(num_rules)
     coeff2 = rng.randn(num_rules)
@@ -70,9 +71,12 @@ def data_v2(num_examples, num_rules, data_seed, ood=False, prob=None, noise_mean
     result = np.zeros([num_examples, num_rules])
 
     for r in range(num_rules):
-        # inject noise into the features for each rule
-        noise = np.random.normal(noise_mean, noise_std, result[:, r].shape)
-        result[:, r] = (coeff1[r] * a + coeff2[r] * b)[:,0] + noise >= 0.
+        # inject noise into the features for each rule if noise_std != 0
+        if noise_std == 0:
+            result[:, r] = (coeff1[r] * a + coeff2[r] * b)[:,0] >= 0
+        else:
+            noise = np.random.normal(noise_mean, noise_std, result[:, r].shape)
+            result[:, r] = (coeff1[r] * a + coeff2[r] * b)[:,0] + noise >= 0.
 
     result = np.sum(result * task, axis=-1)
     sample = np.concatenate((a, b, task), axis=-1)

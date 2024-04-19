@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd Regression
+mkdir Logistics
 
 # perf
 srun -p csc413 --gres gpu -c 2 --pty python3 perf.py --gt-rules 2 --model Monolithic --num-rules 2

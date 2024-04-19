@@ -28,6 +28,7 @@ parser.add_argument('--model', type=str, default='Monolithic', choices=('Monolit
 parser.add_argument('--num-rules', type=int, default=2)
 parser.add_argument('--joint', action='store_true', default=False)
 parser.add_argument('--op', action='store_true', default=False)
+parser.add_argument('--noise-std', type=float, default=0.0)
 
 parser.add_argument('--scheduler', action='store_true', default=False)
 parser.add_argument('--seed', type=int, default=0)
@@ -104,7 +105,7 @@ def eval_step(ood=False, n_evals=10):
 
     with torch.no_grad():
         for _ in range(n_evals):
-            data, label = data_call(args.batch_size, args.gt_rules, args.data_seed, ood)
+            data, label = data_call(args.batch_size, args.gt_rules, args.data_seed, ood, noise_std=args.noise_std)
 
             data = torch.Tensor(data).to(device)
             label = torch.Tensor(label).to(device)
@@ -120,7 +121,7 @@ def train_step():
     model.train()
     model.zero_grad()
 
-    data, label = data_call(args.batch_size, args.gt_rules, args.data_seed)
+    data, label = data_call(args.batch_size, args.gt_rules, args.data_seed, noise_std=args.noise_std)
 
     data = torch.Tensor(data).to(device)
     label = torch.Tensor(label).to(device)

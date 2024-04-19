@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+mkdir Logistics
+
 ###### perf
 srun -p csc413 --gres gpu -c 2 --pty python3 perf.py  --dim 32 --att-dim 64 --gt-rules 2 --model Monolithic --num-rules 2
 srun -p csc413 --gres gpu -c 2 --pty python3 perf.py  --dim 32 --att-dim 64 --gt-rules 4 --model Monolithic --num-rules 4
