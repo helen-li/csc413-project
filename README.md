@@ -29,4 +29,4 @@ Each training script will run each of the four modular systems — Monolithic, M
 
 After training is complete, you will have to evaluate your models. In the same subdirectory, you will find an ```evaluate.sh``` script. Running this will produce metrics that are saved in a new ```Logistics``` directory. 
 
-From here, you can use any of the Python files ```plot_heatmap.py```, ```plot_main```, or ```plot.py``` to visualize metrics and compare results.
+From here, you can use ```plot_main``` and ```plot.py``` to generate the main plots shown in the paper and more detailed plots for each specific architecture, respectively. ```plot_main``` works with the existing Logistics folders in this repository and saves all figures into a new ```Main_Plots``` directory. ```plot.py``` works with six ```Logistics``` directories (one for each architecture and each task) to generate more specific plots for each noise level, which were omitted in the paper in the interest of space. 

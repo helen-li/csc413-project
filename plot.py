@@ -2,9 +2,7 @@
 
 import seaborn as sns
 import matplotlib as mpl
-from matplotlib import font_manager
 from scipy.optimize import linear_sum_assignment
-font_manager._rebuild()
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -29,9 +27,9 @@ model_names = ['GT-Modular', 'Modular-op', 'Modular', 'Monolithic']
 
 def add_random(df, mode, arch='MLP'):
     rules = [2, 4, 8, 16, 32]
-    encs = [32, 64, 128, 256, 512]
-    dims = [128, 256, 512, 1024, 2048]
-    modes = ['last', 'best']
+    encs = [32] # encs = [32, 64, 128, 256, 512]
+    dims = [64] # dims = [128, 256, 512, 1024, 2048]
+    modes = ['last'] # modes = ['last', 'best']
 
     def collapse_metric_worse(prob, rules):
         p = np.min(np.sum(prob, axis=0))
@@ -99,11 +97,11 @@ def add_random(df, mode, arch='MLP'):
                                   -1, -1, -1, -1, -1, -1, -1, -1, -1, cm, cmw, spec, mi, hung, m]
                 df.index += 1
 
-def plot_line(df, x, y, col, row, hue, name, ci=None, hue_order = model_names, title=None, xlabel = None, ylabel = None, marker=None):
+def plot_line(df, x, y, col, row, hue, name, errorbar=None, hue_order = model_names, title=None, xlabel = None, ylabel = None, marker=None):
     g = sns.relplot(
         data=df, x=x, y=y, col=col, row=row,
         hue=hue, kind="line", facet_kws={'sharey': False},
-        hue_order=hue_order, ci=ci, marker=marker
+        hue_order=hue_order, errorbar=errorbar, marker=marker
     )
 
     if row != None:
@@ -127,13 +125,6 @@ def plot_line(df, x, y, col, row, hue, name, ci=None, hue_order = model_names, t
             plt.setp(ax.get_xticklabels(), fontsize=16)
             plt.setp(ax.get_yticklabels(), fontsize=16)
             ax.set_xlabel('', fontsize=24)
-
-        for i, ax in enumerate(g.axes[1]):
-            plt.setp(ax.get_xticklabels(), fontsize=16)
-            plt.setp(ax.get_yticklabels(), fontsize=16)
-
-            if i != 2:
-                ax.set_xlabel('', fontsize=24)
 
     elif col == None:
         sns.move_legend(
@@ -187,11 +178,11 @@ def plot_line(df, x, y, col, row, hue, name, ci=None, hue_order = model_names, t
     plt.savefig(name, bbox_inches='tight')
     plt.close()
 
-def plot_log_line(df, x, y, col, row, hue, name, ci = None, hue_order = model_names, title = None, xlabel = None, ylabel = None):
+def plot_log_line(df, x, y, col, row, hue, name, errorbar = None, hue_order = model_names, title = None, xlabel = None, ylabel = None):
     g = sns.relplot(
         data=df, x=x, y=y, col=col, row=row,
         hue=hue, kind="line", facet_kws={'sharey': False},
-        hue_order=hue_order, ci=ci,
+        hue_order=hue_order, errorbar=errorbar,
         marker='o'
     )
 
@@ -453,7 +444,7 @@ def plot_full(df_training, df_final, rank, name):
               title=None, xlabel='Rules', ylabel=ylabel, hue_order=hue_perf, marker='o')
 
     if 'MHA' in name:
-        for i in [3, 5, 10, 20, 30]:
+        for i in [3, 5, 10]:
             plot_log_line(df_final, 'Number of Parameters', f'Perf-{i}', 'Rules', 'Search-Version', 'Model',
                           f'{name}/perf_{i}_rs.pdf', title='Search-Version: {row_name} | Rules: {col_name}', xlabel=None,
                           ylabel=ylabel, hue_order=hue_perf)
@@ -547,23 +538,6 @@ def plot_full(df_training, df_final, rank, name):
     plot_metrics_full(df, 'Capacity', 'Inverse Mutual Information', 'Rules', None, 'Model', f'{name}/imi_full.pdf', hue_order=hue_metrics)
     plot_metrics_full(df, 'Capacity', 'Alignment', 'Rules', None, 'Model', f'{name}/h_full.pdf', hue_order=hue_metrics)
 
-    if 'MHA' in name:
-        plot_pie(rank[0]['perf_last'], hue_pie, colors, f'{name}/rank_1.pdf')
-        plot_pie(rank[0]['perf_ood_last'], hue_pie, colors, f'{name}/rank_ood_1.pdf')
-        plot_pie(rank[0]['perf_sub_last'], hue_pie_sub, [colors[1], colors[-1]], f'{name}/rank_sub_1.pdf', circle=False)
-        plot_pie(rank[0]['perf_ood_sub_last'], hue_pie_sub, [colors[1], colors[-1]], f'{name}/rank_ood_sub_1.pdf',
-                 circle=False)
-
-        plot_pie(rank[1]['perf_last'], hue_pie, colors, f'{name}/rank_2.pdf')
-        plot_pie(rank[1]['perf_ood_last'], hue_pie, colors, f'{name}/rank_ood_2.pdf')
-        plot_pie(rank[1]['perf_sub_last'], hue_pie_sub, [colors[1], colors[-1]], f'{name}/rank_sub_2.pdf', circle=False)
-        plot_pie(rank[1]['perf_ood_sub_last'], hue_pie_sub, [colors[1], colors[-1]], f'{name}/rank_ood_sub_2.pdf', circle=False)
-
-        r = dict()
-        for key in rank[0].keys():
-            r[key] = rank[0][key] + rank[1][key]
-        rank = r
-
     plot_pie(rank['perf_last'], hue_pie, colors, f'{name}/rank.pdf')
     plot_pie(rank['perf_ood_last'], hue_pie, colors, f'{name}/rank_ood.pdf')
     plot_pie(rank['perf_sub_last'], hue_pie_sub, [colors[1], colors[-1]], f'{name}/rank_sub.pdf', circle=False)
@@ -583,132 +557,36 @@ print('MLP')
 mlp_versions = ['MLP-Classification-WithDecoder', 'MLP-Classification-WithoutDecoder', 'MLP-Regression-WithDecoder', 'MLP-Regression-WithoutDecoder']
 names = [f'MLP/Classification/With_Decoder', f'MLP/Classification/Without_Decoder', f'MLP/Regression/With_Decoder', f'MLP/Regression/Without_Decoder']
 
-mlp_clf_wd_final = pd.read_pickle(f'MLP/ToyTask/Classification/With_Decoder/Logistics/df_final.pt')
+mlp_clf_wd_final = pd.read_pickle(f'MLP/Classification/Logistics/df_final.pt')
 mlp_clf_wd_final['Perf'] = 100. - mlp_clf_wd_final['Perf']
 mlp_clf_wd_final['Perf-OoD'] = 100. - mlp_clf_wd_final['Perf-OoD']
 add_random(mlp_clf_wd_final, mlp_versions[0])
-mlp_clf_wd_final['Mutual Information'] = (np.log(mlp_clf_wd_final['Rules'].astype(np.float)) - mlp_clf_wd_final['Mutual Information']) / np.log(mlp_clf_wd_final['Rules'].astype(np.float))
-mlp_clf_wd_training = pd.read_pickle(f'MLP/ToyTask/Classification/With_Decoder/Logistics/df_training.pt')
+mlp_clf_wd_final['Mutual Information'] = (np.log(mlp_clf_wd_final['Rules'].astype(float)) - mlp_clf_wd_final['Mutual Information']) / np.log(mlp_clf_wd_final['Rules'].astype(float))
+mlp_clf_wd_training = pd.read_pickle(f'MLP/Classification/Logistics/df_training.pt')
 mlp_clf_wd_training['Perf'] = 100. - mlp_clf_wd_training['Perf']
 
-# for model in ['Modular', 'GT-Modular', 'Modular-op', 'Monolithic']:
-#     for rule in [2, 4, 8, 16, 32]:
-#         for enc in [32, 64, 128, 256, 512]:
-#             for ds in range(5):
-#                 for seed in range(5):
-#                     x = mlp_clf_wd_training.loc[(mlp_clf_wd_training['Mode'] == 'MLP-Classification-WithDecoder') &
-#                                                 (mlp_clf_wd_training['Model'] == model) &
-#                                                 (mlp_clf_wd_training['Rule'] == rule) &
-#                                                 (mlp_clf_wd_training['Encoder Dimension'] == enc) &
-#                                                 (mlp_clf_wd_training['Dimension'] == 4 * enc) &
-#                                                 (mlp_clf_wd_training['Data Seed'] == ds) &
-#                                                 (mlp_clf_wd_training['Seed'] == seed) &
-#                                                 (mlp_clf_wd_training['Iteration'] == 50000.0)].iloc[0]
-#                     params = x['Number of Parameters']
-#                     perf = x['Perf']
-#
-#                     temp = dict()
-#                     temp['Mode'] = ['MLP-Classification-WithDecoder'] * 80
-#                     temp['Model'] = [model] * 80
-#                     temp['Rule'] = [rule] * 80
-#                     temp['Encoder Dimension'] = [enc] * 80
-#                     temp['Dimension'] = [4*enc] * 80
-#                     temp['Data Seed'] = [ds] * 80
-#                     temp['Seed'] = [seed] * 80
-#                     temp['Iteration'] = np.array(list(range(105000, 505000, 5000))).astype(np.float)
-#                     temp['Number of Parameters'] = [params] * 80
-#                     temp['Perf'] = [perf] * 80
-#
-#                     mlp_clf_wd_training = pd.concat([mlp_clf_wd_training, pd.DataFrame.from_dict(temp)], ignore_index=True)
-
-with open(f'MLP/ToyTask/Classification/With_Decoder/Logistics/ranking.pickle', 'rb') as handle:
+with open(f'MLP/Classification/Logistics/ranking.pickle', 'rb') as handle:
     mlp_clf_wd_rank = pickle.load(handle)
 
-# mlp_clf_wo_final = pd.read_pickle(f'MLP/ToyTask/Classification/Without_Decoder/Logistics/df_final.pt')
-# mlp_clf_wo_final['Perf'] = 100. - mlp_clf_wo_final['Perf']
-# mlp_clf_wo_final['Perf-OoD'] = 100. - mlp_clf_wo_final['Perf-OoD']
-# add_random(mlp_clf_wo_final, mlp_versions[1])
-# mlp_clf_wo_final['Mutual Information'] = (np.log(mlp_clf_wo_final['Rules'].astype(np.float)) - mlp_clf_wo_final['Mutual Information']) / np.log(mlp_clf_wo_final['Rules'].astype(np.float))
-# mlp_clf_wo_training = pd.read_pickle(f'MLP/ToyTask/Classification/Without_Decoder/Logistics/df_training.pt')
-# mlp_clf_wo_training['Perf'] = 100. - mlp_clf_wo_training['Perf']
-# with open(f'MLP/ToyTask/Classification/Without_Decoder/Logistics/ranking.pickle', 'rb') as handle:
-#     mlp_clf_wo_rank = pickle.load(handle)
-
-mlp_reg_wd_final = pd.read_pickle(f'MLP/ToyTask/Regression/With_Decoder/Logistics/df_final.pt')
+mlp_reg_wd_final = pd.read_pickle(f'MLP/Regression/Logistics/df_final.pt')
 add_random(mlp_reg_wd_final, mlp_versions[2])
-mlp_reg_wd_final['Mutual Information'] = (np.log(mlp_reg_wd_final['Rules'].astype(np.float)) - mlp_reg_wd_final['Mutual Information']) / np.log(mlp_reg_wd_final['Rules'].astype(np.float))
-mlp_reg_wd_training = pd.read_pickle(f'MLP/ToyTask/Regression/With_Decoder/Logistics/df_training.pt')
+mlp_reg_wd_final['Mutual Information'] = (np.log(mlp_reg_wd_final['Rules'].astype(float)) - mlp_reg_wd_final['Mutual Information']) / np.log(mlp_reg_wd_final['Rules'].astype(float))
+mlp_reg_wd_training = pd.read_pickle(f'MLP/Regression/Logistics/df_training.pt')
 
-# for model in ['Modular', 'GT-Modular', 'Modular-op', 'Monolithic']:
-#     for rule in [2, 4, 8, 16, 32]:
-#         for enc in [32, 64, 128, 256, 512]:
-#             for ds in range(5):
-#                 for seed in range(5):
-#                     x = mlp_reg_wd_training.loc[(mlp_reg_wd_training['Mode'] == 'MLP-Regression-WithDecoder') &
-#                                                 (mlp_reg_wd_training['Model'] == model) &
-#                                                 (mlp_reg_wd_training['Rule'] == rule) &
-#                                                 (mlp_reg_wd_training['Encoder Dimension'] == enc) &
-#                                                 (mlp_reg_wd_training['Dimension'] == 4 * enc) &
-#                                                 (mlp_reg_wd_training['Data Seed'] == ds) &
-#                                                 (mlp_reg_wd_training['Seed'] == seed) &
-#                                                 (mlp_reg_wd_training['Iteration'] == 50000.0)].iloc[0]
-#                     params = x['Number of Parameters']
-#                     perf = x['Perf']
-#
-#                     temp = dict()
-#                     temp['Mode'] = ['MLP-Regression-WithDecoder'] * 80
-#                     temp['Model'] = [model] * 80
-#                     temp['Rule'] = [rule] * 80
-#                     temp['Encoder Dimension'] = [enc] * 80
-#                     temp['Dimension'] = [4*enc] * 80
-#                     temp['Data Seed'] = [ds] * 80
-#                     temp['Seed'] = [seed] * 80
-#                     temp['Iteration'] = np.array(list(range(105000, 505000, 5000))).astype(np.float)
-#                     temp['Number of Parameters'] = [params] * 80
-#                     temp['Perf'] = [perf] * 80
-#
-#                     mlp_reg_wd_training = pd.concat([mlp_reg_wd_training, pd.DataFrame.from_dict(temp)], ignore_index=True)
-
-with open(f'MLP/ToyTask/Regression/With_Decoder/Logistics/ranking.pickle', 'rb') as handle:
+with open(f'MLP/Regression/Logistics/ranking.pickle', 'rb') as handle:
     mlp_reg_wd_rank = pickle.load(handle)
 
-# mlp_reg_wo_final = pd.read_pickle(f'MLP/ToyTask/Regression/Without_Decoder/Logistics/df_final.pt')
-# add_random(mlp_reg_wo_final, mlp_versions[3])
-# mlp_reg_wo_final['Mutual Information'] = (np.log(mlp_reg_wo_final['Rules'].astype(np.float)) - mlp_reg_wo_final['Mutual Information']) / np.log(mlp_reg_wo_final['Rules'].astype(np.float))
-# mlp_reg_wo_training = pd.read_pickle(f'MLP/ToyTask/Regression/Without_Decoder/Logistics/df_training.pt')
-# with open(f'MLP/ToyTask/Regression/Without_Decoder/Logistics/ranking.pickle', 'rb') as handle:
-#     mlp_reg_wo_rank = pickle.load(handle)
-
-# mlp_classification_final = pd.concat([mlp_clf_wd_final, mlp_clf_wo_final], ignore_index=True)
-# mlp_regression_final = pd.concat([mlp_reg_wd_final, mlp_reg_wo_final], ignore_index=True)
-# mlp_final = pd.concat([mlp_clf_wd_final, mlp_clf_wo_final, mlp_reg_wd_final, mlp_reg_wo_final], ignore_index=True)
 mlp_final = pd.concat([mlp_clf_wd_final, mlp_reg_wd_final], ignore_index=True)
 
-# mlp_rank_classification = dict()
-# for key in mlp_clf_wo_rank.keys():
-#     mlp_rank_classification[key] = mlp_clf_wo_rank[key] + mlp_clf_wd_rank[key]
-# mlp_rank_regression = dict()
-# for key in mlp_clf_wo_rank.keys():
-#     mlp_rank_regression[key] = mlp_reg_wo_rank[key] + mlp_reg_wd_rank[key]
 mlp_rank = dict()
 for key in mlp_clf_wd_rank.keys():
     mlp_rank[key] = mlp_clf_wd_rank[key] + mlp_reg_wd_rank[key]
-    # mlp_rank[key] = mlp_clf_wo_rank[key] + mlp_clf_wd_rank[key] + \
-    #                 mlp_reg_wo_rank[key] + mlp_reg_wd_rank[key]
 
-# mlp_classification_training = pd.concat([mlp_clf_wd_training, mlp_clf_wo_training], ignore_index=True)
-# mlp_regression_training = pd.concat([mlp_reg_wd_training, mlp_reg_wo_training], ignore_index=True)
-# mlp_training = pd.concat([mlp_clf_wd_training, mlp_clf_wo_training, mlp_reg_wd_training, mlp_reg_wo_training], ignore_index=True)
 mlp_training = pd.concat([mlp_clf_wd_training, mlp_reg_wd_training], ignore_index=True)
-plot_full(mlp_clf_wd_training, mlp_clf_wd_final, mlp_clf_wd_rank, f'Plots/MLP/Classification/With_Decoder/')
-# plot_full(mlp_clf_wo_training, mlp_clf_wo_final, mlp_clf_wo_rank, f'Plots/MLP/Classification/Without_Decoder/')
-plot_full(mlp_reg_wd_training, mlp_reg_wd_final, mlp_reg_wd_rank, f'Plots/MLP/Regression/With_Decoder/')
-# plot_full(mlp_reg_wo_training, mlp_reg_wo_final, mlp_reg_wo_rank, f'Plots/MLP/Regression/Without_Decoder/')
+plot_full(mlp_clf_wd_training, mlp_clf_wd_final, mlp_clf_wd_rank, f'Plots/MLP/Classification/With_Decoder')
+plot_full(mlp_reg_wd_training, mlp_reg_wd_final, mlp_reg_wd_rank, f'Plots/MLP/Regression/With_Decoder')
 
-# plot_full(mlp_classification_training, mlp_classification_final, mlp_rank_classification, f'Plots/MLP/Classification/')
-# plot_full(mlp_regression_training, mlp_regression_final, mlp_rank_regression, f'Plots/MLP/Regression/')
-
-plot_full(mlp_training, mlp_final, mlp_rank, f'Plots/MLP/')
+plot_full(mlp_training, mlp_final, mlp_rank, f'Plots/MLP')
 
 # Get Transformer Details
 
@@ -716,45 +594,39 @@ print('MHA')
 
 tsf_versions = ['MHA-Classification', 'MHA-Regression']
 names = [f'MHA/Classification', f'MHA/Regression']
-lens = [3, 5, 10, 20, 30]
+lens = [3, 5, 10]
 
-mha_clf_final = pd.read_pickle(f'Transformer/ToyTask/Classification/Nonlinear/Logistics/df_final.pt')
+mha_clf_final = pd.read_pickle(f'MHA/Classification/Logistics/df_final.pt')
 for l in lens:
     mha_clf_final[f'Perf-{l}'] = 100. - mha_clf_final[f'Perf-{l}']
     mha_clf_final[f'Perf-OoD-{l}'] = 100. - mha_clf_final[f'Perf-OoD-{l}']
 add_random(mha_clf_final, tsf_versions[0], arch='MHA')
-mha_clf_final['Mutual Information'] = (np.log(mha_clf_final['Rules'].astype(np.float)) - mha_clf_final['Mutual Information']) / np.log(mha_clf_final['Rules'].astype(np.float))
+mha_clf_final['Mutual Information'] = (np.log(mha_clf_final['Rules'].astype(float)) - mha_clf_final['Mutual Information']) / np.log(mha_clf_final['Rules'].astype(float))
 mha_clf_final['Perf'] = mha_clf_final['Perf-10']
 mha_clf_final['Perf-OoD'] = mha_clf_final['Perf-OoD-30']
-mha_clf_training = pd.read_pickle(f'Transformer/ToyTask/Classification/Nonlinear/Logistics/df_training.pt')
+mha_clf_training = pd.read_pickle(f'MHA/Classification/Logistics/df_training.pt')
 mha_clf_training['Perf'] = 100. - mha_clf_training['Perf']
-with open(f'Transformer/ToyTask/Classification/Nonlinear/Logistics/ranking_1.pickle', 'rb') as handle:
+with open(f'MHA/Classification/Logistics/ranking_1.pickle', 'rb') as handle:
     mha_clf_rank_1 = pickle.load(handle)
-with open(f'Transformer/ToyTask/Classification/Nonlinear/Logistics/ranking_2.pickle', 'rb') as handle:
-    mha_clf_rank_2 = pickle.load(handle)
 
-mha_reg_final = pd.read_pickle(f'Transformer/ToyTask/Regression/Nonlinear/Logistics/df_final.pt')
+mha_reg_final = pd.read_pickle(f'MHA/Regression/Logistics/df_final.pt')
 add_random(mha_reg_final, tsf_versions[0], arch='MHA')
-mha_reg_final['Mutual Information'] = (np.log(mha_reg_final['Rules'].astype(np.float)) - mha_reg_final['Mutual Information']) / np.log(mha_reg_final['Rules'].astype(np.float))
+mha_reg_final['Mutual Information'] = (np.log(mha_reg_final['Rules'].astype(float)) - mha_reg_final['Mutual Information']) / np.log(mha_reg_final['Rules'].astype(float))
 mha_reg_final['Perf'] = mha_reg_final['Perf-10']
 mha_reg_final['Perf-OoD'] = mha_reg_final['Perf-OoD-30']
-mha_reg_training = pd.read_pickle(f'Transformer/ToyTask/Regression/Nonlinear/Logistics/df_training.pt')
-with open(f'Transformer/ToyTask/Regression/Nonlinear/Logistics/ranking_1.pickle', 'rb') as handle:
+mha_reg_training = pd.read_pickle(f'MHA/Regression/Logistics/df_training.pt')
+with open(f'MHA/Regression/Logistics/ranking_1.pickle', 'rb') as handle:
     mha_reg_rank_1 = pickle.load(handle)
-with open(f'Transformer/ToyTask/Regression/Nonlinear/Logistics/ranking_2.pickle', 'rb') as handle:
-    mha_reg_rank_2 = pickle.load(handle)
 
 mha_final = pd.concat([mha_clf_final, mha_reg_final], ignore_index=True)
 mha_training = pd.concat([mha_clf_training, mha_reg_training], ignore_index=True)
 mha_rank_1 = dict()
-mha_rank_2 = dict()
 for key in mha_clf_rank_1.keys():
     mha_rank_1[key] = mha_clf_rank_1[key] + mha_reg_rank_1[key]
-    mha_rank_2[key] = mha_clf_rank_2[key] + mha_reg_rank_2[key]
 
-plot_full(mha_clf_training, mha_clf_final, (mha_clf_rank_1, mha_clf_rank_2), f'Plots/MHA/Classification/')
-plot_full(mha_reg_training, mha_reg_final, (mha_reg_rank_1, mha_reg_rank_2), f'Plots/MHA/Regression/')
-plot_full(mha_training, mha_final, (mha_rank_1, mha_rank_2), f'Plots/MHA/')
+plot_full(mha_clf_training, mha_clf_final, mha_clf_rank_1, f'Plots/MHA/Classification')
+plot_full(mha_reg_training, mha_reg_final, mha_reg_rank_1, f'Plots/MHA/Regression')
+plot_full(mha_training, mha_final, (mha_rank_1), f'Plots/MHA')
 
 # Get RNN Details
 
@@ -764,26 +636,26 @@ rnn_versions = ['RNN-Classification', 'RNN-Regression']
 names = [f'RNN/SCOFF/Classification', f'RNN/SCOFF/Regression']
 lens = [3, 5, 10, 20, 30]
 
-rnn_clf_final = pd.read_pickle(f'RNN/SCOFF/Classification/Logistics/df_final.pt')
+rnn_clf_final = pd.read_pickle(f'RNN/Classification/Logistics/df_final.pt')
 for l in lens:
     rnn_clf_final[f'Perf-{l}'] = 100. - rnn_clf_final[f'Perf-{l}']
     rnn_clf_final[f'Perf-OoD-{l}'] = 100. - rnn_clf_final[f'Perf-OoD-{l}']
 add_random(rnn_clf_final, rnn_versions[0], arch='RNN')
-rnn_clf_final['Mutual Information'] = (np.log(rnn_clf_final['Rules'].astype(np.float)) - rnn_clf_final['Mutual Information']) / np.log(rnn_clf_final['Rules'].astype(np.float))
+rnn_clf_final['Mutual Information'] = (np.log(rnn_clf_final['Rules'].astype(float)) - rnn_clf_final['Mutual Information']) / np.log(rnn_clf_final['Rules'].astype(float))
 rnn_clf_final['Perf'] = rnn_clf_final['Perf-10']
 rnn_clf_final['Perf-OoD'] = rnn_clf_final['Perf-OoD-30']
-rnn_clf_training = pd.read_pickle(f'RNN/SCOFF/Classification/Logistics/df_training.pt')
+rnn_clf_training = pd.read_pickle(f'RNN/Classification/Logistics/df_training.pt')
 rnn_clf_training['Perf'] = 100. - rnn_clf_training['Perf']
-with open(f'RNN/SCOFF/Classification/Logistics/ranking.pickle', 'rb') as handle:
+with open(f'RNN/Classification/Logistics/ranking.pickle', 'rb') as handle:
     rnn_clf_rank = pickle.load(handle)
 
-rnn_reg_final = pd.read_pickle(f'RNN/SCOFF/Regression/Logistics/df_final.pt')
+rnn_reg_final = pd.read_pickle(f'RNN/Regression/Logistics/df_final.pt')
 add_random(rnn_reg_final, rnn_versions[0], arch='RNN')
-rnn_reg_final['Mutual Information'] = (np.log(rnn_reg_final['Rules'].astype(np.float)) - rnn_reg_final['Mutual Information']) / np.log(rnn_reg_final['Rules'].astype(np.float))
+rnn_reg_final['Mutual Information'] = (np.log(rnn_reg_final['Rules'].astype(float)) - rnn_reg_final['Mutual Information']) / np.log(rnn_reg_final['Rules'].astype(float))
 rnn_reg_final['Perf'] = rnn_reg_final['Perf-10']
 rnn_reg_final['Perf-OoD'] = rnn_reg_final['Perf-OoD-30']
-rnn_reg_training = pd.read_pickle(f'RNN/SCOFF/Regression/Logistics/df_training.pt')
-with open(f'RNN/SCOFF/Regression/Logistics/ranking.pickle', 'rb') as handle:
+rnn_reg_training = pd.read_pickle(f'RNN/Regression/Logistics/df_training.pt')
+with open(f'RNN/Regression/Logistics/ranking.pickle', 'rb') as handle:
     rnn_reg_rank = pickle.load(handle)
 
 rnn_final = pd.concat([rnn_clf_final, rnn_reg_final], ignore_index=True)
@@ -802,7 +674,7 @@ print('Consolidated')
 
 rank = dict()
 for key in mha_rank_1.keys():
-    rank[key] = mha_rank_1[key] + mha_rank_2[key] + mlp_rank[key] + rnn_rank[key]
+    rank[key] = mha_rank_1[key] + mlp_rank[key] + rnn_rank[key]
 
 hue_pie = ['GT-Modular', 'Modular', 'Modular-op', 'Monolithic']
 hue_pie_sub = ['Modular', 'Monolithic']
