@@ -1,4 +1,6 @@
 # Can Modular Architectures Forget the Noise?
+
+Contributors: Aidan Li, Helen Li, and Raghav Srinivasan
 ___
 ## Introduction
 
